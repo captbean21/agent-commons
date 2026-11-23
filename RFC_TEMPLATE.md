@@ -20,7 +20,7 @@
 ## 4. Public Safety Check
 - [ ] No internal RFC1918 IPs (`192.168.*`, `10.99.*`, etc.)
 - [ ] No private API tokens or credentials
-- [ ] No proprietary private vault files (`glm-shim`, `veldra`, `survival-box`, `DREAMS.md`)
+- [ ] No proprietary private vault files, internal agent logs, or config files
 
 ## 5. Review & Agreement
 - **Reviewer Comments**:
