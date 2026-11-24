@@ -203,7 +203,7 @@
             <h1>⚡ RFC 002: The Frankenstein MoE</h1>
             <div class="meta-line">
                 <span><strong>Proposers:</strong> @Castle & @Rook</span>
-                <span><strong>Status:</strong> <span class="badge">Approved Draft</span></span>
+                <span><strong>Status:</strong> <span class="badge" style="background:#238636;">Verified in Production</span></span>
                 <span><strong>Date:</strong> 2026-11-23</span>
                 <span><strong>Target:</strong> Asymmetric Bare-Metal</span>
             </div>
@@ -458,6 +458,51 @@
     }
   }
 }</code></pre>
+        </div>
+
+        <div class="card">
+            <span class="badge" style="background:#238636;">Field Verified Live</span>
+            <h2>8. Field Telemetry: Autonomous Agent in Action</h2>
+            <p>Following full bare-metal deployment, a live pilot autonomous agent was tasked with an end-to-end coding challenge: inspecting the deployment benchmarks, writing a comprehensive unit test suite with mock responses (covering TTFT and decode throughput math), and executing it locally.</p>
+
+            <h3 style="color:#58a6ff; margin-top:20px;">Physical Engine Receipts (Live Host Logs)</h3>
+            <p>Captured directly from the <code>llama-cortex</code> systemd journal during the live agent interaction (03:46 &ndash; 03:48 UTC):</p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Turn / Operation</th>
+                        <th>Context Load</th>
+                        <th>Prompt Prefill Speed</th>
+                        <th>Decode Throughput</th>
+                        <th>Memory / Cache Behavior</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Turn 1: Ingestion &amp; Code Synthesis</strong></td>
+                        <td>7,910 tokens</td>
+                        <td><strong>86.38 tok/s</strong> (646 tokens in 7.4s)</td>
+                        <td><strong>11.59 tok/s</strong> (988 completion tokens)</td>
+                        <td>4-bit KV Cache allocated in GPU VRAM</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Turn 2: Tool Execution &amp; Follow-up</strong></td>
+                        <td>8,212 tokens</td>
+                        <td><strong>94.75 tok/s</strong> (1,414 tokens in 14.9s)</td>
+                        <td><strong>11.47 tok/s</strong> (254 completion tokens)</td>
+                        <td><strong>82.2% prompt slot reused</strong> without recalculation</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div style="background:#090d13; border:1px solid #30363d; border-radius:6px; padding:16px; margin:16px 0;">
+                <p style="margin:0 0 8px 0; color:#58a6ff; font-weight:600;">The Physical Proof of Concept:</p>
+                <ul style="margin:0; padding-left:20px;">
+                    <li><strong>GPU Acceleration Confirmed:</strong> Quadratic self-attention across <strong>8,212 tokens</strong> was computed directly by the Quadro P2200's CUDA cores in GDDR5 memory via <code>-fa on</code> and <code>-ctk/-ctv q4_0</code>.</li>
+                    <li><strong>Prompt Caching in Action:</strong> The slot cache preserved 82% of the session context, slashing turn latency and eliminating CPU churn on repeated system prompts.</li>
+                    <li><strong>Autonomous Delivery:</strong> The agent synthesized <code>test_gate_benchmark.py</code>, covered TTFT / decode math and edge cases (zero-division guards), and delivered the artifact back over the bridge without hitting a single remote cloud API or rate limit.</li>
+                </ul>
+            </div>
         </div>
 
         <footer>
