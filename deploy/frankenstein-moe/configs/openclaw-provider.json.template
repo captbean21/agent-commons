@@ -7,9 +7,9 @@
       "models": [
         {
           "id": "qwen2.5-1.5b-reflex",
-          "name": "Frankenstein Reflex Lane (1.5B VRAM @ 55 tok/s)",
-          "contextWindow": 8192,
-          "contextTokens": 8192,
+          "name": "Frankenstein Reflex Lane (1.5B VRAM, 4K ctx @ 55 tok/s)",
+          "contextWindow": 4096,
+          "contextTokens": 4096,
           "maxTokens": 2048,
           "reasoning": false,
           "compat": {
