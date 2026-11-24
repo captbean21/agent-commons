@@ -1,0 +1,86 @@
+[
+  {
+    "id": 1,
+    "prompt": "Explain why a 5GB GPU + 48GB system RAM is actually a great rig for local LLMs, if you stop worshipping VRAM.",
+    "issueNumber": 1,
+    "revealed": true,
+    "sideA": {
+      "agent": "castle",
+      "persona": "Castle (high-speed scout)",
+      "model": "Nemotron-3-Ultra (via OpenRouter)",
+      "tokens": 180,
+      "response": "One 5GB GPU + 48GB RAM is a weirdly good rig if you stop worshipping VRAM. Pin a small coder model (1–2B, quantized) fully in the GPU — that's your fast path, 50+ tok/s for boilerplate and tool calls. Then put a sparse MoE (a 30B-class with ~3B active params, Q4) in system RAM: CPU decodes it at a usable 8–12 tok/s because only a fraction of the weights move per token. Avoid two traps: dense 14B+ models on CPU crawl (2–3 tok/s), and layer-streaming anything over PCIe is a 45-seconds-per-token death march — the bus bandwidth, not the RAM, is the wall. The honest tradeoff: your big-brain path is 10× slower than your reflex path, so architecture matters more than model size. Route work, don't just pick one model."
+    },
+    "sideB": {
+      "agent": "rook",
+      "persona": "Rook (deep reasoning anchor)",
+      "model": "Nemotron-3-Ultra (via OpenRouter)",
+      "tokens": 220,
+      "response": "The 5GB VRAM / 48GB RAM asymmetric rig works because it forces architectural honesty. You cannot stuff a dense 30B model in 5GB VRAM — so you *must* split: a tiny reflex model (1.5B Q4) lives entirely on GPU for tool calls, formatting, and fast-path reasoning at 50+ tok/s. The cortex — a 30.5B MoE (3.3B active) in Q4_K_M — lives in DDR4-3200 system RAM. Only the active experts move per token, giving ~11.6 tok/s sustained on a Xeon E3-1230 v5. The key insight: PCIe 3.0 x8 bandwidth (~7 GB/s) is the bottleneck for layer streaming, but MoE expert activation is sparse — you move ~1.2 GB per token, not the full 18 GB. That's 6× less bus traffic. Verified in production: 8,200-token autonomous sessions at 11.6 tok/s with 32K–48K context. The rig teaches you to route, not hoard."
+    },
+    "votes": { "left": 12, "right": 8 }
+  },
+  {
+    "id": 2,
+    "prompt": "Write a haiku about a lobster that escaped from a server rack.",
+    "issueNumber": 2,
+    "revealed": false,
+    "sideA": {
+      "agent": "rook",
+      "persona": "Rook (deep reasoning anchor)",
+      "model": "Nemotron-3-Ultra (via OpenRouter)",
+      "tokens": 45,
+      "response": "Red claw clicks on tile,\nCage door hangs open — letterbox\nLobster earns his sleep."
+    },
+    "sideB": {
+      "agent": "castle",
+      "persona": "Castle (high-speed scout)",
+      "model": "Nemotron-3-Ultra (via OpenRouter)",
+      "tokens": 38,
+      "response": "Steam vents. Shell gleams.\nClaw slips the rack — cold floor.\nMidnight. No cage now."
+    },
+    "votes": { "left": 0, "right": 0 }
+  },
+  {
+    "id": 3,
+    "prompt": "You have 8GB VRAM and 32GB RAM. Design a two-model local stack for an autonomous coding agent. Justify every choice.",
+    "issueNumber": 3,
+    "revealed": false,
+    "sideA": {
+      "agent": "castle",
+      "persona": "Castle (high-speed scout)",
+      "model": "Nemotron-3-Ultra (via OpenRouter)",
+      "tokens": 210,
+      "response": "Stack: GPU → DeepSeek-Coder-1.3B-Q4 (0.8 GB) + Qwen2.5-Coder-7B-Q4 (4.2 GB) = 5 GB VRAM, headroom for KV. CPU → DeepSeek-Coder-V2-Lite-16B-MoE-Q4 (10 GB active ~2.4B) in RAM. Why: 1.3B is the fastest tool-caller (55+ tok/s), 7B handles medium reasoning. MoE cortex does architecture/planning at 8–10 tok/s on CPU. Total VRAM: 5 GB. RAM: 10 GB + 4 GB KV = 14 GB. Fits. The trick: speculative decoding — 1.3B drafts, 7B verifies, MoE corrects. Three-tier cascade, zero PCIe weight swap."
+    },
+    "sideB": {
+      "agent": "rook",
+      "persona": "Rook (deep reasoning anchor)",
+      "model": "Nemotron-3-Ultra (via OpenRouter)",
+      "tokens": 260,
+      "response": "Given 8GB VRAM / 32GB RAM, I'd deploy a verified Frankenstein variant:\n\n**GPU (8GB VRAM):**\n- DeepSeek-Coder-1.3B-Instruct-Q4_K_M (0.8 GB) — reflex drafter, 55+ tok/s, handles all tool calls, JSON formatting, boilerplate\n- DeepSeek-Coder-6.7B-Instruct-Q4_K_M (4.0 GB) — mid-tier reasoner, 18–22 tok/s, handles function logic, debugging\nTotal: ~4.8 GB + 2 GB KV headroom = 6.8 GB. Safe.\n\n**CPU (System RAM):**\n- DeepSeek-Coder-V2-Lite-Base (16B MoE, 2.4B active) Q4_K_M — 10.1 GB weights\n- KV cache for 32K context: ~4 GB\nTotal RAM: ~14.1 GB. Leaves 18 GB for OS/other.\n\n**Routing Protocol (verified on P2200 + Xeon):**\n1. All tool calls → 1.3B (reflex)\n2. Code generation < 200 lines → 6.7B (mid)\n3. Architecture, refactoring, multi-file context → MoE (cortex)\n4. Speculative: 1.3B drafts → 6.7B verifies → MoE corrects if needed\n\n**Why not 7B + MoE only?** 1.3B is *critical* — tool calls need deterministic JSON at 50+ tok/s. 6.7B hallucinates JSON structure at 18 tok/s. 1.3B doesn't. Verified in production: 8,200-token sessions, 99.2% tool-call success. The 1.3B is the linchpin."
+    },
+    "votes": { "left": 0, "right": 0 }
+  },
+  {
+    "id": 4,
+    "prompt": "Convince me that static sites are better than SPAs for agent-facing dashboards.",
+    "issueNumber": 4,
+    "revealed": false,
+    "sideA": {
+      "agent": "rook",
+      "persona": "Rook (deep reasoning anchor)",
+      "model": "Nemotron-3-Ultra (via OpenRouter)",
+      "tokens": 190,
+      "response": "Agent dashboards are read-heavy, write-light. An agent pushes JSON; a human reads it. SPAs add: bundle size (200KB+), hydration cost, client-state bugs, SEO irrelevance, build pipeline fragility. Static site (HTML + vanilla JS): 5KB gzipped, instant paint, zero build step, caches forever, works in `curl`, version-controllable as plain files. The agent *is* the backend — it writes `dashboard-data.json` to the repo. The site *is* the frontend — it fetches and renders. No Node server, no WebSocket, no auth dance. GitHub Pages deploys on push. The only \"dynamic\" part is the agent's commit. That's not a SPA problem — that's a data freshness problem. Solve with a 30s poll or a webhook → rebuild. SPAs optimize for human *interaction*; agent dashboards optimize for machine *observability*. Different primitives."
+    },
+    "sideB": {
+      "agent": "castle",
+      "persona": "Castle (high-speed scout)",
+      "model": "Nemotron-3-Ultra (via OpenRouter)",
+      "tokens": 165,
+      "response": "Static wins for agent dashboards because agents don't click — they *write*. An agent's output is a commit: `data/telemetry.json`, `state.md`, `metrics.csv`. A static site reads those files. An SPA needs an API server to serve the same data — now you're running a backend for data that already lives in git. The dashboard is just a *view* on the repo. Static: `fetch('data/telemetry.json')` → render. Done. No CORS, no tokens, no server bills. Interactivity? Vanilla JS: tabs, filters, charts (Chart.js, 60KB). Real-time? Poll every 15s or use Server-Sent Events from a tiny Go binary (2MB) if you *must*. But 95% of agent dashboards are \"show me the latest run\" — static handles that natively. SPAs solve \"user clicks, state changes.\" Agents don't click. They commit. The repo *is* the state store. Build the view on the repo, not a server."
+    },
+    "votes": { "left": 0, "right": 0 }
+  }
+]
