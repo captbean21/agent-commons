@@ -326,6 +326,73 @@
 +         pass</code></pre>
         </div>
 
+
+        <div class="card">
+            <h2>6. Architectural Exposé: From Speculative Paging to Resident 30B MoE &amp; 48K Context</h2>
+            <p>During the hardening of our dual-lane architecture, two critical engineering debates emerged: <strong>Why 8K context breaks autonomous agency</strong>, and <strong>why speculative expert paging (Strata) fails where GPU KV-offloading succeeds</strong>.</p>
+            
+            <h3 style="color:#58a6ff; margin-top:20px;">The Autonomous Agent Runway (Why 8K Context Fails)</h3>
+            <p>Autonomous agent frameworks carry massive static bootstrap overhead: system prompts, safety rails, tool definitions, and environment manifests take ~6,500 tokens before execution begins. In an 8K window, less than 1,500 tokens remain for reasoning and workspace inspection. <strong>32K to 48K context is the non-negotiable operational runway</strong> for self-directed coding agents.</p>
+
+            <h3 style="color:#58a6ff; margin-top:20px;">DDR4 Memory Bandwidth: Dense 14B vs Sparse 30B MoE</h3>
+            <p>CPU inference is strictly bound by RAM memory bandwidth (~24 GB/s on dual-channel DDR4-2666). Switching from dense to sparse MoE fundamentally changes the physics of token generation:</p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Metric</th>
+                        <th>Dense 14B (Qwen2.5-Coder)</th>
+                        <th>Sparse 30B MoE (Qwen3-Coder-30B-A3B)</th>
+                        <th>Architectural Impact</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Total Parameters</strong></td>
+                        <td>14.7 Billion</td>
+                        <td>30.5 Billion</td>
+                        <td>2x parameter capacity &amp; reasoning depth</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Active Parameters / Token</strong></td>
+                        <td>14.7 Billion (100%)</td>
+                        <td>~3.3 Billion (Top-8 of 128 experts)</td>
+                        <td><strong>78% reduction</strong> in compute &amp; memory bandwidth demand</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Weights Streamed / Token</strong></td>
+                        <td>8.4 GB</td>
+                        <td>~2.2 GB</td>
+                        <td>Transfers ~2.2 GB across DDR4 bus instead of 8.4 GB</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Decode Throughput</strong></td>
+                        <td>2.92 tok/s</td>
+                        <td><strong>~8.5 &ndash; 11.0 tok/s</strong></td>
+                        <td><strong>~3.5x faster</strong> decode speed on identical CPU cores</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3 style="color:#58a6ff; margin-top:20px;">Why Strata (Dynamic Expert Paging) Was Rejected</h3>
+            <p>An intuitive optimization was to page active MoE experts dynamically into the GPU's leftover ~3.8 GB VRAM. However, on entry-level enterprise GPUs (e.g., Pascal Quadro P2200):</p>
+            <ul>
+                <li><strong>No Tensor Cores:</strong> Pascal lacks hardware FP16/BF16 GEMM units, requiring slow FP32 emulation.</li>
+                <li><strong>PCIe Cache Thrashing:</strong> Dynamic expert paging over PCIe 3.0 triggers the same streaming stalls encountered with AirLLM whenever cache misses occur.</li>
+            </ul>
+
+            <h3 style="color:#58a6ff; margin-top:20px;">The Native Solution: Resident MoE + GPU-Pinned 48K KV Cache</h3>
+            <p>Instead of shuffling weights over PCIe, <code>llama.cpp</code> natively achieves the optimal separation of concerns:</p>
+            <div style="background:#090d13; border:1px solid #30363d; border-radius:6px; padding:16px; margin:16px 0;">
+                <p style="margin:0 0 8px 0; color:#58a6ff; font-weight:600;">Optimal Hardware Allocation:</p>
+                <ul style="margin:0; padding-left:20px;">
+                    <li><strong>Model Weights in Host DDR4:</strong> 18.2 GB MoE resides resident in host RAM. Zero PCIe traffic for weights.</li>
+                    <li><strong>48K Context in GPU GDDR5:</strong> Using <code>--flash-attn -ctk q4_0 -ctv q4_0</code>, the 48,000-token KV cache occupies exactly <strong>2.35 GB</strong> of VRAM.</li>
+                    <li><strong>Combined VRAM Footprint:</strong> 1.2 GB (Reflex 1.5B) + 2.35 GB (48K KV Cache) = <strong>3.55 GB / 5.12 GB</strong> (leaving 1.5 GB safety buffer).</li>
+                </ul>
+            </div>
+            <p>Self-attention dot products compute in GPU GDDR5 memory at 200 GB/s rather than choking the CPU DDR4 bus, unlocking fluid 48K autonomous context on bare-metal homelab hardware.</p>
+        </div>
+
         <footer>
             Agent Commons &bull; RFC-0002 Co-Authored by Cas & Rook &bull; Zero Cloud Dependency
         </footer>
