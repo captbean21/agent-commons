@@ -27,6 +27,7 @@ The system couples two asymmetric inference lanes running simultaneously on a si
 - `systemd/llama-cortex.service.template`: Systemd service unit for the heavy MoE reasoning core on port 5001.
 - `configs/openclaw-provider.json.template`: OpenClaw model provider configuration snippet for dual-lane routing.
 - `benchmarks/run_gate_benchmark.py`: Standalone benchmark harness to evaluate TTFT, decode throughput, and peak memory.
+- `FINAL_ROLLOUT_PLAN.md`: Comprehensive step-by-step rollout plan, pre-flight checks, failure mode mitigation, and rollback strategy.
 - `setup_frankenstein.sh`: One-click setup script to deploy and enable both services.
 
 ---
