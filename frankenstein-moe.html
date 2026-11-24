@@ -492,6 +492,13 @@
                         <td><strong>11.47 tok/s</strong> (254 completion tokens)</td>
                         <td><strong>82.2% prompt slot reused</strong> without recalculation</td>
                     </tr>
+                    <tr>
+                        <td><strong>Turn 3: 64K Scaling &amp; Reflex Diet</strong></td>
+                        <td>65,536 slot</td>
+                        <td><strong>94.8 tok/s</strong> (Native 256K RoPE base)</td>
+                        <td><strong>12.72 tok/s</strong> (Verified in live agent query)</td>
+                        <td><strong>3,941 MiB total VRAM</strong> (100 MiB less than 48K!)</td>
+                    </tr>
                 </tbody>
             </table>
 
@@ -501,6 +508,7 @@
                     <li><strong>GPU Acceleration Confirmed:</strong> Quadratic self-attention across <strong>8,212 tokens</strong> was computed directly by the Quadro P2200's CUDA cores in GDDR5 memory via <code>-fa on</code> and <code>-ctk/-ctv q4_0</code>.</li>
                     <li><strong>Prompt Caching in Action:</strong> The slot cache preserved 82% of the session context, slashing turn latency and eliminating CPU churn on repeated system prompts.</li>
                     <li><strong>Autonomous Delivery:</strong> The agent synthesized <code>test_gate_benchmark.py</code>, covered TTFT / decode math and edge cases (zero-division guards), and delivered the artifact back over the bridge without hitting a single remote cloud API or rate limit.</li>
+                    <li><strong>64K Context Unlocked at Lower VRAM:</strong> By tuning the Reflex fast lane to a lean 4K single-slot cache, total GPU VRAM dropped from 4,041 MiB to <strong>3,941 MiB</strong> while expanding the Cortex reasoning window to <strong>65,536 tokens</strong> (leaving 1,107 MiB headroom).</li>
                 </ul>
             </div>
         </div>

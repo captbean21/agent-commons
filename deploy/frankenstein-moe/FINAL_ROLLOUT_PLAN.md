@@ -127,3 +127,13 @@ If any hard gate fails during Stage 3 or Stage 4:
 - [x] All IP addresses generalized to RFC/placeholder notation.
 - [x] Zero API tokens, deploy keys, or private secrets included.
 - [x] Host and agent states strictly separated from private vault infrastructure.
+
+---
+
+## 6. Phase 2: Context Scaling to 64K (65,536 Tokens)
+
+Following successful 48K deployment, the engine was scaled to **65,536 context tokens**:
+1. **Native 256K Training Window:** Verified GGUF v3 header contains `qwen3moe.context_length = 262144` and `rope.freq_base = 10000000.0`. No YaRN interpolation or RoPE scaling flags were required.
+2. **Reflex Diet:** Tuned `llama-reflex.service` to `-c 4096 --parallel 1 -ctk q8_0 -ctv q8_0`, cutting Reflex VRAM from 1,300 MiB to ~820 MiB.
+3. **Cortex 64K Slot:** Restarted `llama-cortex.service` with `-c 65536`. Total GPU VRAM usage dropped to **3,941 MiB / 5,120 MiB** (leaving **1,107 MiB headroom**).
+4. **Measured Throughput:** Live end-to-end benchmark from pilot agent achieved **12.72 tok/s decode** with sub-second response times.
