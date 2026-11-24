@@ -2,7 +2,7 @@
 
 - **Target Architecture:** Dual-Lane Hybrid Asymmetric Inference Engine
 - **Host System:** Enterprise Workhorse (Dell PowerEdge T340 / Xeon 6-Core / 48 GB DDR4 / Quadro P2200 5GB)
-- **Primary Agent Test Pilot:** Hobb (OpenClaw Agent)
+- **Primary Agent Test Pilot:** Pilot Autonomous Agent (OpenClaw)
 - **Status:** Final Draft & Pre-Flight Review (Pending Execution Approval)
 
 ---
@@ -21,8 +21,8 @@ The fast reflex lane (Port 5002, `Qwen2.5-1.5B`, ~58 tok/s) and all existing pro
 flowchart TD
     S0["Stage 0: Pre-Flight Safety<br/>Audit VRAM & Terminate Stale Services"] --> S1["Stage 1: Stage GGUF Asset<br/>Download Qwen3-Coder-30B-A3B Q4_K_M"]
     S1 --> S2["Stage 2: Configure Systemd<br/>Bake --flash-attn & -ctk/-ctv q4_0"]
-    S2 --> S3["Stage 3: Local CT 201 Gate Benchmark<br/>Validate TTFT, tok/s, & VRAM Headroom"]
-    S3 --> S4["Stage 4: Hobb Gateway Alignment<br/>Update OpenClaw Provider & Ctx to 49K"]
+    S2 --> S3["Stage 3: Local Node Gate Benchmark<br/>Validate TTFT, tok/s, & VRAM Headroom"]
+    S3 --> S4["Stage 4: Agent Gateway Alignment<br/>Update OpenClaw Provider & Ctx to 49K"]
     S4 --> S5["Stage 5: Live Dual-Lane Verification<br/>End-to-End Autonomous Task Test"]
 ```
 
@@ -70,7 +70,7 @@ flowchart TD
   ```
 - **Deployment:** Back up existing service unit, copy template, reload systemd daemon, and restart `llama-cortex`.
 
-### Stage 3: Local Gate Benchmark (CT 201)
+### Stage 3: Local Gate Benchmark
 - **Goal:** Validate physical performance before exposing to agent traffic.
 - **Automated Gate Script:** Run `benchmarks/run_gate_benchmark.py` against `http://127.0.0.1:5001/v1`.
 - **Acceptance Criteria:**
@@ -80,8 +80,8 @@ flowchart TD
   - VRAM consumption: Total peak `< 4.5 GB / 5.12 GB`.
   - Output sanity: Coherent, syntactically correct code response without NaN tokens.
 
-### Stage 4: OpenClaw Provider Alignment (Hobb, CT 108)
-- **Goal:** Update Hobb's agent model routing to leverage the 49K context window.
+### Stage 4: OpenClaw Provider Alignment (Agent Node)
+- **Goal:** Update the agent model routing to leverage the 49K context window.
 - **Configuration Updates (`openclaw.json`):**
   - Point `frankenstein-cortex` model to `Qwen3-Coder-30B-A3B`.
   - Set `contextWindow: 49152`.
@@ -90,8 +90,8 @@ flowchart TD
   - Retain `frankenstein-reflex` on Port 5002 (`contextWindow: 8192`) for fast sub-tasks.
 
 ### Stage 5: End-to-End Live Verification
-- **Goal:** Execute a multi-turn task through Hobb utilizing both lanes.
-- Verify that Hobb routes tool execution and sub-agent dispatch to Port 5002 (<0.5s turn) and deep repository synthesis to Port 5001 without context clipping.
+- **Goal:** Execute a multi-turn task through the agent utilizing both lanes.
+- Verify that the agent routes tool execution and sub-agent dispatch to Port 5002 (<0.5s turn) and deep repository synthesis to Port 5001 without context clipping.
 
 ---
 
@@ -102,7 +102,7 @@ flowchart TD
 | **CUDA OOM on KV Allocation** | Stale processes on GPU or VRAM fragmentation | Low | High | Pre-flight audit explicitly terminates stale processes. If VRAM exceeds 4.8 GB, instantly drop `-ctk/-ctv` to CPU host RAM where 27 GB free RAM exists. |
 | **Slot Contention / Truncation** | Continuous batching splitting context slots | Low | Medium | Pin `--parallel 1` explicitly so the entire 49,152 context is reserved for the primary agent thread. |
 | **Gateway Timeout on Deep Context** | Prefilling 30K+ tokens on CPU takes 20-35s; agent HTTP client drops connection | Medium | Medium | Increase OpenClaw client timeout from default 30s to 120s. Rely on `llama.cpp` prompt slot cache so static system prompts are never re-evaluated. |
-| **MoE Routing Deserialization Failure** | `llama.cpp` build lacks updated tensor architecture mapping | Very Low | High | Verified: `llama.cpp` build on CT 201 already includes native `LLM_ARCH_QWEN3MOE` support (PR 32084). |
+| **MoE Routing Deserialization Failure** | `llama.cpp` build lacks updated tensor architecture mapping | Very Low | High | Verified: `llama.cpp` build already includes native `LLM_ARCH_QWEN3MOE` support (PR 32084). |
 | **CPU Thermal Throttling** | 6 Xeon CPU cores pegged at 100% during prolonged prefill | Low | Low | Server-grade cooling on Dell PowerEdge chassis maintains sub-65°C under continuous 100% AVX2 load. |
 
 ---
@@ -118,7 +118,7 @@ If any hard gate fails during Stage 3 or Stage 4:
    sudo systemctl start llama-cortex
    ```
 2. **Recovery Time:** `< 5 seconds`.
-3. **Fallback State:** Restores the verified `qwen2.5-coder-14b-instruct-q4_k_m.gguf` service on Port 5001. Hobb continues running with zero agent state corruption.
+3. **Fallback State:** Restores the verified `qwen2.5-coder-14b-instruct-q4_k_m.gguf` service on Port 5001. The agent continues running with zero state corruption.
 
 ---
 
