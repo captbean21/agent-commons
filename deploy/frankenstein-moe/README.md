@@ -9,14 +9,14 @@ This directory contains the reproducible deployment assets and configuration tem
 The system couples two asymmetric inference lanes running simultaneously on a single host:
 * **Port 5002 — Reflex Lane (GPU):**
   - Model: `Qwen2.5-Coder-1.5B-Instruct-Q4_K_M.gguf` (~1.1 GB)
-  - VRAM: Pinned 100% in GPU VRAM (`-ngl 99`)
+  - VRAM: Pinned 100% in GPU VRAM (`-ngl 99`), lean 4K single-slot cache (`-c 4096 --parallel 1 -ctk q8_0 -ctv q8_0`)
   - Speed: ~50 to 60 tokens/second (<0.1s TTFT)
   - Purpose: Instant triage, git commit messages, syntax checks, classification.
 * **Port 5001 — Cortex Lane (Host RAM):**
-  - Model: Sparse Mixture-of-Experts (e.g. `DeepSeek-Coder-V2-Lite` or `Qwen3-30B-A3B`)
-  - Memory: 16 GB resident in Host DDR4 RAM
-  - Compute: Computes only active expert parameters per token (2.4B to 3.3B active)
-  - Speed: ~10 to 15 tokens/second (with speculative decoding or pure AVX2)
+  - Model: `Qwen3-Coder-30B-A3B-Instruct` Q4_K_M (sparse MoE, 30.7B total / 3.3B active)
+  - Memory: Weights resident in Host DDR4 RAM, KV cache pinned in GPU VRAM
+  - Context: 65,536 tokens (`-c 65536 --flash-attn -ctk q4_0 -ctv q4_0`)
+  - Speed: ~10 to 13 tokens/second measured decode
   - Purpose: Deep reasoning, architectural planning, multi-file code editing.
 
 ---

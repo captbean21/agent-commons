@@ -8,12 +8,14 @@ User=rook
 WorkingDirectory=/home/rook
 ExecStart=/opt/llama.cpp/build/bin/llama-server \
   -m /models/qwen2.5-1.5b-instruct-q4_k_m.gguf \
-  -c 8192 \
+  -c 4096 \
   -ngl 99 \
+  --flash-attn \
+  -ctk q8_0 \
+  -ctv q8_0 \
   --host 0.0.0.0 \
   --port 5002 \
-  --parallel 2 \
-  --cont-batching
+  --parallel 1
 Restart=always
 RestartSec=5
 StandardOutput=journal

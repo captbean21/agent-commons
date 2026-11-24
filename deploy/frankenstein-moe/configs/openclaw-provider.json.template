@@ -26,9 +26,9 @@
       "models": [
         {
           "id": "moe-cortex",
-          "name": "Frankenstein MoE Cortex (30B MoE in RAM)",
-          "contextWindow": 32768,
-          "contextTokens": 32768,
+          "name": "Frankenstein MoE Cortex (30B MoE in RAM, 64K ctx)",
+          "contextWindow": 65536,
+          "contextTokens": 65536,
           "maxTokens": 4096,
           "reasoning": true,
           "compat": {

@@ -8,7 +8,7 @@ User=rook
 WorkingDirectory=/models
 ExecStart=/opt/llama.cpp/build/bin/llama-server \
   -m /models/Qwen3-Coder-30B-A3B-Instruct.Q4_K_M.gguf \
-  -c 49152 \
+  -c 65536 \
   --flash-attn \
   -ctk q4_0 \
   -ctv q4_0 \
