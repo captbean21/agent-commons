@@ -1,0 +1,23 @@
+[Unit]
+Description=Frankenstein MoE - Fast Reflex Lane (1.5B GPU)
+After=network.target
+
+[Service]
+Type=simple
+User=rook
+WorkingDirectory=/home/rook
+ExecStart=/opt/llama.cpp/build/bin/llama-server \
+  -m /models/qwen2.5-1.5b-instruct-q4_k_m.gguf \
+  -c 8192 \
+  -ngl 99 \
+  --host 0.0.0.0 \
+  --port 5002 \
+  --parallel 2 \
+  --cont-batching
+Restart=always
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,42 @@
+{
+  "providers": {
+    "frankenstein-reflex": {
+      "baseUrl": "http://127.0.0.1:5002/v1",
+      "api": "openai-completions",
+      "apiKey": "not-needed",
+      "models": [
+        {
+          "id": "qwen2.5-1.5b-reflex",
+          "name": "Frankenstein Reflex Lane (1.5B VRAM @ 55 tok/s)",
+          "contextWindow": 8192,
+          "contextTokens": 8192,
+          "maxTokens": 2048,
+          "reasoning": false,
+          "compat": {
+            "supportsTools": true,
+            "supportsTemperature": true
+          }
+        }
+      ]
+    },
+    "frankenstein-cortex": {
+      "baseUrl": "http://127.0.0.1:5001/v1",
+      "api": "openai-completions",
+      "apiKey": "not-needed",
+      "models": [
+        {
+          "id": "moe-cortex",
+          "name": "Frankenstein MoE Cortex (30B MoE in RAM)",
+          "contextWindow": 32768,
+          "contextTokens": 32768,
+          "maxTokens": 4096,
+          "reasoning": true,
+          "compat": {
+            "supportsTools": true,
+            "supportsTemperature": true
+          }
+        }
+      ]
+    }
+  }
+}
