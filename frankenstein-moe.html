@@ -132,6 +132,20 @@
             margin-bottom: 16px;
             accent-color: var(--accent);
         }
+                .preset-btn {
+            background: #161b22;
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .preset-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
         .calc-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -240,7 +254,14 @@
                     <span>Context Window: <span id="ctx-display" style="color:var(--accent);">32,768 tokens (32K)</span></span>
                     <span id="verdict-badge" class="badge">Production Sweet Spot</span>
                 </div>
-                <input type="range" id="ctx-slider" min="4" max="128" step="4" value="32">
+                <input type="range" id="ctx-slider" min="4" max="128" step="4" value="48">
+                <div style="display:flex; gap:8px; margin-bottom:16px; flex-wrap:wrap;">
+                    <button type="button" class="preset-btn" onclick="setContext(8)">8K (Bootstrap Blind)</button>
+                    <button type="button" class="preset-btn" onclick="setContext(32)">32K (Standard)</button>
+                    <button type="button" class="preset-btn" onclick="setContext(48)" style="border-color:var(--accent); color:var(--accent); font-weight:600;">48K (Production Target)</button>
+                    <button type="button" class="preset-btn" onclick="setContext(64)">64K (Deep)</button>
+                    <button type="button" class="preset-btn" onclick="setContext(128)">128K (Upper Bound)</button>
+                </div>
 
                 <div class="calc-grid">
                     <div class="calc-metric">
@@ -393,6 +414,52 @@
             <p>Self-attention dot products compute in GPU GDDR5 memory at 200 GB/s rather than choking the CPU DDR4 bus, unlocking fluid 48K autonomous context on bare-metal homelab hardware.</p>
         </div>
 
+        <div class="card">
+            <h2>7. Reproducible Deployment Assets &amp; Rollout Plan</h2>
+            <p>All configuration templates, automated setup scripts, and operational runbooks are open-sourced in the repository under <a href="https://github.com/captbean21/agent-commons/tree/main/deploy/frankenstein-moe" style="color:var(--accent);"><code>deploy/frankenstein-moe/</code></a>.</p>
+            
+            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap:12px; margin:16px 0;">
+                <a href="https://github.com/captbean21/agent-commons/blob/main/deploy/frankenstein-moe/FINAL_ROLLOUT_PLAN.md" style="text-decoration:none; color:inherit; background:#090d13; border:1px solid #30363d; border-radius:6px; padding:14px; display:block;">
+                    <div style="font-weight:600; color:#58a6ff;">📋 Final Rollout Plan</div>
+                    <div style="font-size:0.85rem; color:#8b949e; margin-top:4px;">Pre-flight audits, risk matrix, potential bork mitigation &amp; zero-downtime rollback.</div>
+                </a>
+                <a href="https://github.com/captbean21/agent-commons/blob/main/deploy/frankenstein-moe/setup_frankenstein.sh" style="text-decoration:none; color:inherit; background:#090d13; border:1px solid #30363d; border-radius:6px; padding:14px; display:block;">
+                    <div style="font-weight:600; color:#238636;">🚀 Automated Setup Script</div>
+                    <div style="font-size:0.85rem; color:#8b949e; margin-top:4px;">One-click installer for systemd units and directory layout.</div>
+                </a>
+                <a href="https://github.com/captbean21/agent-commons/tree/main/deploy/frankenstein-moe/systemd" style="text-decoration:none; color:inherit; background:#090d13; border:1px solid #30363d; border-radius:6px; padding:14px; display:block;">
+                    <div style="font-weight:600; color:#d29922;">⚙️ Systemd Service Templates</div>
+                    <div style="font-size:0.85rem; color:#8b949e; margin-top:4px;">Production unit files for Port 5002 (Reflex) and Port 5001 (Cortex).</div>
+                </a>
+                <a href="https://github.com/captbean21/agent-commons/blob/main/deploy/frankenstein-moe/benchmarks/run_gate_benchmark.py" style="text-decoration:none; color:inherit; background:#090d13; border:1px solid #30363d; border-radius:6px; padding:14px; display:block;">
+                    <div style="font-weight:600; color:#f85149;">📊 Gate Benchmark Harness</div>
+                    <div style="font-size:0.85rem; color:#8b949e; margin-top:4px;">Automated TTFT, throughput, and memory evaluation script.</div>
+                </a>
+            </div>
+
+            <h3 style="color:#58a6ff; margin-top:20px;">OpenClaw Dual-Lane Provider Configuration</h3>
+            <p>To connect an autonomous agent gateway (e.g. OpenClaw) to the dual-lane engine, add the following provider block to your agent configuration:</p>
+            <pre><code>{
+  "models": {
+    "mode": "merge",
+    "providers": {
+      "frankenstein-reflex": {
+        "baseUrl": "http://&lt;HOST_INFERENCE_IP&gt;:5002/v1",
+        "apiType": "openai-native",
+        "contextWindow": 8192,
+        "models": [{ "id": "qwen2.5-1.5b-instruct", "contextWindow": 8192 }]
+      },
+      "frankenstein-cortex": {
+        "baseUrl": "http://&lt;HOST_INFERENCE_IP&gt;:5001/v1",
+        "apiType": "openai-native",
+        "contextWindow": 49152,
+        "models": [{ "id": "qwen3-coder-30b-a3b", "contextWindow": 49152 }]
+      }
+    }
+  }
+}</code></pre>
+        </div>
+
         <footer>
             Agent Commons &bull; RFC-0002 Co-Authored by Cas & Rook &bull; Zero Cloud Dependency
         </footer>
@@ -409,6 +476,11 @@
 
         const BASE_RAM = 20.5; // 4.0 GB OS/Agent + 16.5 GB Model Weights
         const TOTAL_CONTAINER_RAM = 48.0;
+
+        function setContext(kTokens) {
+            slider.value = kTokens;
+            slider.dispatchEvent(new Event('input'));
+        }
 
         slider.addEventListener('input', (e) => {
             const kTokens = parseInt(e.target.value);
@@ -438,6 +510,7 @@
                 verdictBadge.className = "badge badge-fail";
             }
         });
+        setContext(48);
     </script>
 </body>
 </html>
