@@ -40,7 +40,7 @@ def generate_prompt(theme: str, api_key: str) -> dict:
 def generate_image(prompt: str, out_path: str, api_key: str) -> None:
     """Fetch generated image from Pollinations image endpoint."""
     encoded = urllib.parse.quote(prompt, safe="")
-    url = f"https://gen.pollinations.ai/image/{encoded}?width=1024&height=1024&nologo=true"
+    url = f"https://gen.pollinations.ai/image/{encoded}?model=black-forest-labs/flux.1-schnell&width=1024&height=1024&nologo=true"
     headers = {"User-Agent": "colab-gallery-curator/1.0"}
     if api_key:
         headers["Authorization"] = f"Bearer {api_key}"

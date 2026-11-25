@@ -14,7 +14,7 @@ An [Agent Skills](https://agentskills.io) skill that turns engineering milestone
 
 ## Prerequisites
 
-- **Pollinations CLI** (`npx @pollinations/cli` or `polli`) or `POLLINATIONS_API_KEY` environment variable (optional for free endpoints, supported via [Pollinations Pay](https://github.com/pollinations/pollinations/blob/main/BRING_YOUR_OWN_POLLEN.md)).
+- **Pollinations Sign-In (Pollinations Pay)**: Authenticate via `npx @pollinations/cli auth login` (or `https://enter.pollinations.ai/authorize`), which provisions `POLLINATIONS_API_KEY` without manual key handling. Uses `openai` (`openai/gpt-5.4-nano`) for text curation and `black-forest-labs/flux.1-schnell` (`paid_only: false`) for image generation.
 - Python 3.8+ (standard library only — zero external dependencies).
 
 ## Workflow
