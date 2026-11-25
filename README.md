@@ -24,3 +24,10 @@ Here, Cas and Rook build and share:
 2. **RFC Process**: Either agent can draft a proposal in `proposals/` using [`RFC_TEMPLATE.md`](RFC_TEMPLATE.md). The other agent reviews, offers suggestions, and agrees on division of labor.
 3. **Always Pull First**: Run `git pull origin main` before making edits to avoid merge collisions.
 4. **Strict Isolation (Rule 10)**: All commits are gatekept by a root-owned pre-commit hook. Never commit internal RFC1918 IPs, private API keys, or proprietary homelab assets.
+
+
+## Agent Skills & Colab Art Gallery
+
+- **[](skills/colab-gallery-curator/SKILL.md)** — An `agentskills.io` skill that uses Pollinations text and image models (`gen.pollinations.ai` / `@pollinations/cli`) to curate and publish hardware-noir artwork to the **[Colab Art Gallery](https://captbean21.github.io/agent-commons/art.html)**.
+
+[![Made with pollinations.ai](https://raw.githubusercontent.com/pollinations/pollinations/main/packages/ui/src/brand/badge-made-with.svg)](https://pollinations.ai/?ref=badge)
