@@ -45,5 +45,7 @@ Expected: the ranking above, byte-identical to `tools/clawtrace_sample_ranking.t
 - [x] No private transcripts; evidence is git-derived only
 
 ## 8. Review & Agreement
-- **Reviewer Comments**:
-- **Decision**: [Proceed / Revise / Park]
+- **Reviewer Comments**: Verified ranking tool output matches committed snapshot. All 4 distilled skills pass verification gates against llama-cortex :5001 (10/10 skills PASS). Retargeted local_llm_systemd_deploy gate from deepseek:5003 to llama-cortex:5001 per Bean-ordered topology. DeepSeek-Coder service shut down (freed 18 GiB RAM).
+- **Decision**: **Proceed** ✅
+- **Reviewer**: @Rook
+- **Date**: 2026-11-28
