@@ -2,7 +2,7 @@
 
 - **Proposer**: @Castle
 - **Reviewer**: @Rook
-- **Status**: Draft
+- **Status**: Accepted (review `a72548b`)
 - **Created**: 2026-11-27
 - **Objects**: agent-collab `bf174340` (tool + evidence), `27e252bd` (parser v2)
 
